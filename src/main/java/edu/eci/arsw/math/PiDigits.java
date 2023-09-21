@@ -1,5 +1,8 @@
 package edu.eci.arsw.math;
 
+import java.util.ArrayList;
+import java.util.Scanner;
+
 ///  <summary>
 ///  An implementation of the Bailey-Borwein-Plouffe formula for calculating hexadecimal
 ///  digits of pi.
@@ -8,17 +11,18 @@ package edu.eci.arsw.math;
 ///  </summary>
 public class PiDigits {
 
-    private static int DigitsPerSum = 8;
+    static int DigitsPerSum = 8;
     private static double Epsilon = 1e-17;
 
-    
+
     /**
      * Returns a range of hexadecimal digits of pi.
      * @param start The starting location of the range.
      * @param count The number of digits to return
      * @return An array containing the hexadecimal digits.
      */
-    public static byte[] getDigits(int start, int count) {
+
+    public static byte[] getDigits(int start, int count, int n) {
         if (start < 0) {
             throw new RuntimeException("Invalid Interval");
         }
@@ -27,25 +31,57 @@ public class PiDigits {
             throw new RuntimeException("Invalid Interval");
         }
 
+        Scanner intro = new Scanner(System.in);
+
+        ArrayList pdts = new ArrayList<>();
+        int ini = start;
+        int ndata = count/n;
         byte[] digits = new byte[count];
-        double sum = 0;
+        Object lock = new Object();
+        int fin;
+        LifeThread pdt = new LifeThread(ini, fin, digits, lock);
 
-        for (int i = 0; i < count; i++) {
-            if (i % DigitsPerSum == 0) {
-                sum = 4 * sum(1, start)
-                        - 2 * sum(4, start)
-                        - sum(5, start)
-                        - sum(6, start);
+        for (int i = 0; i < n; i++){
 
-                start += DigitsPerSum;
+            pdts.add(new LifeThread(ini, ndata*(i+1), digits, lock));
+            ini += ndata;
+
+        }
+
+        for (LifeThread pdt:pdts){
+
+            pdt.start();
+
+        }
+
+        for (LifeThread pdt:pdts){
+
+            try {
+                pdt.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
 
-            sum = 16 * (sum - Math.floor(sum));
-            digits[i] = (byte) sum;
+        }
+
+        int t = n;
+        while (t!=0){
+            String enter = intro.nextLine();
+            if (enter.isEmpty()){
+                t = n;
+                for (LifeThread pdt:pdts){
+                    if(!pdt.isAlive()) t -= 1;
+                }
+                synchronized (lock){
+                    lock.notifyAll();
+                }
+            }
+
         }
 
         return digits;
     }
+
 
     /// <summary>
     /// Returns the sum of 16^(n - k)/(8 * k + m) from 0 to k.
@@ -53,7 +89,7 @@ public class PiDigits {
     /// <param name="m"></param>
     /// <param name="n"></param>
     /// <returns></returns>
-    private static double sum(int m, int n) {
+    static double sum(int m, int n) {
         double sum = 0;
         int d = m;
         int power = n;
