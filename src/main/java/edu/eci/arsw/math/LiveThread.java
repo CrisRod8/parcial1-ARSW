@@ -1,20 +1,74 @@
 package edu.eci.arsw.math;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
+public class LiveThread extends Thread {
 
-///  <summary>
-///  An implementation of the Bailey-Borwein-Plouffe formula for calculating hexadecimal
-///  digits of pi.
-///  https://en.wikipedia.org/wiki/Bailey%E2%80%93Borwein%E2%80%93Plouffe_formula
-///  *** Translated from C# code: https://github.com/mmoroney/DigitsOfPi ***
-///  </summary>
-public class PiDigits {
 
     private static int DigitsPerSum = 8;
     private static double Epsilon = 1e-17;
+
+
+    private int start;
+
+    private int count;
+
+    private byte[] digits;
+
+
+    public static int getDigitsPerSum() {
+        return DigitsPerSum;
+    }
+
+    public static void setDigitsPerSum(int digitsPerSum) {
+        DigitsPerSum = digitsPerSum;
+    }
+
+    public static double getEpsilon() {
+        return Epsilon;
+    }
+
+    public static void setEpsilon(double epsilon) {
+        Epsilon = epsilon;
+    }
+
+    public int getStart() {
+        return start;
+    }
+
+    public void setStart(int start) {
+        this.start = start;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+
+    public byte[] getDigits() {
+        return digits;
+    }
+
+    public void setDigits(byte[] digits) {
+        this.digits = digits;
+    }
+
+    public LiveThread(int start, int count){
+        this.start = start;
+        this.count = count;
+
+
+
+    }
+
+
+    @Override
+    public void run(){
+        digits = getDigits(this.start,this.count);
+
+    }
+
 
 
     /**
@@ -24,7 +78,6 @@ public class PiDigits {
      * @return An array containing the hexadecimal digits.
      */
     public static byte[] getDigits(int start, int count) {
-
 
         if (start < 0) {
             throw new RuntimeException("Invalid Interval");
@@ -51,47 +104,6 @@ public class PiDigits {
         }
 
         return digits;
-    }
-
-
-    public static byte[] getDigits(int start, int count, int n ) throws InterruptedException, IOException {
-        byte[] digits = new byte[count];
-        ArrayList<LiveThread> threads = new ArrayList<>();
-        int increment = count / n;
-        int restIncrement = count % n;
-        int finish = increment;
-        //creacion de hilos
-
-        for(int i = 0; i < n; i++){
-            if(i == n-1){
-                increment += restIncrement;
-                finish = increment;
-            }
-            threads.add(new LiveThread(start,finish));
-            start += increment;
-        }
-        //iniciar hilos
-
-        for(LiveThread th : threads){
-            th.start();
-        }
-
-
-
-        //esperar al hilo main
-        for(LiveThread th : threads){
-            th.join();
-        }
-
-        //resultado
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-        for (LiveThread th : threads) {
-            outputStream.write(th.getDigits());
-        }
-        return outputStream.toByteArray();
-
-
     }
 
     /// <summary>
@@ -156,5 +168,6 @@ public class PiDigits {
 
         return result;
     }
+
 
 }

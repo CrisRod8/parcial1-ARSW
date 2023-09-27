@@ -5,7 +5,9 @@
  */
 package edu.eci.arsw.math;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Scanner;
 
 /**
  *
@@ -13,10 +15,22 @@ import java.util.Arrays;
  */
 public class Main {
 
-    public static void main(String a[]) {
-        System.out.println(bytesToHex(PiDigits.getDigits(0, 10, 3)));
-        System.out.println(bytesToHex(PiDigits.getDigits(1, 100, 3)));
-        System.out.println(bytesToHex(PiDigits.getDigits(1, 1000000, 3)));
+    public static void main(String a[]) throws InterruptedException, IOException {
+        //System.out.println(bytesToHex(PiDigits.getDigits(0, 10)));
+        //System.out.println(bytesToHex(PiDigits.getDigits(1, 100)));
+
+        //byte[] digits = PiDigits.getDigits(0, 100000, 1);
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Digite el numero de digitos a conocer:");
+        int dig = scanner.nextInt();
+        System.out.println("Digite el numero de hilos a crear:");
+        int hil = scanner.nextInt();
+        int ini = 0;
+
+        System.out.println(bytesToHex(PiDigits.getDigits(ini, dig, hil)));
+
+
     }
 
     private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
@@ -31,7 +45,7 @@ public class Main {
         StringBuilder sb=new StringBuilder();
         for (int i=0;i<hexChars.length;i=i+2){
             //sb.append(hexChars[i]);
-            sb.append(hexChars[i+1]);            
+            sb.append(hexChars[i+1]);
         }
         return sb.toString();
     }
